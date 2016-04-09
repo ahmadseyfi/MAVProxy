@@ -13,6 +13,7 @@ import serial, Queue, select
 import traceback
 import select
 import shlex
+import rospy
 
 from MAVProxy.modules.lib import textconsole
 from MAVProxy.modules.lib import rline
@@ -978,7 +979,11 @@ if __name__ == '__main__':
           wifi_device = '0.0.0.0:14550'
           mpstate.module('link').link_add(wifi_device)
 
-
+    #Waiting for ROS Master to run
+    print "[Watchdog] Trying to register to ROS"
+    rospy.init_node('my_node_name', anonymous=True)
+    rospy.sleep(5)
+    print "[Watchdog] ROS master is ready. Continuing..."
     # open any mavlink output ports
     for port in opts.output:
         mpstate.mav_outputs.append(mavutil.mavlink_connection(port, baud=int(opts.baudrate), input=False))
