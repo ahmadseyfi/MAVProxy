@@ -5,6 +5,7 @@ import time, os, fnmatch, sys, time
 from pymavlink import mavutil, mavwp
 from MAVProxy.modules.lib import mp_settings
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 
 class NSHModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -19,8 +20,8 @@ class NSHModule(mp_module.MPModule):
               ]
             )
         self.add_completion_function('(SERIALSETTING)', self.serial_settings.completion)
-        self.last_packet = time.time()
-        self.last_check = time.time()
+        self.last_packet = sync_ros.time()
+        self.last_check = sync_ros.time()
         self.started = False
 
     def mavlink_packet(self, m):
@@ -33,7 +34,7 @@ class NSHModule(mp_module.MPModule):
                     # strip nsh ansi codes
                     s = s.replace("\033[K","")
                 sys.stdout.write(s)
-                self.last_packet = time.time()
+                self.last_packet = sync_ros.time()
 
     def stop(self):
         '''stop nsh input'''
@@ -71,7 +72,7 @@ class NSHModule(mp_module.MPModule):
         '''handle mavlink packets'''
         if not self.started:
             return
-        now = time.time()
+        now = sync_ros.time()
         if now - self.last_packet < 1:
             timeout = 0.05
         else:

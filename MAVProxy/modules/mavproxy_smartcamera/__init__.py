@@ -33,7 +33,7 @@ import time, math, sched
 from pymavlink import mavutil
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib.mp_settings import MPSetting
-
+from MAVProxy.modules import sync_ros
 
 # Own Headers
 from sc_webcam import SmartCameraWebCam
@@ -78,7 +78,7 @@ class SmartCameraModule(mp_module.MPModule):
         self.add_command('setCamAperture', self.__vCmdSetCamAperture, "Set Camera Aperture")
         self.add_command('setCamShutterSpeed', self.__vCmdSetCamShutterSpeed, "Set Camera Shutter Speed")
         self.add_command('setCamExposureMode', self.__vCmdSetCamExposureMode, "Set Camera Exposure Mode")
-        self.CamRetryScheduler = sched.scheduler(time.time, time.sleep)
+        self.CamRetryScheduler = sched.scheduler(sync_ros.time, sync_ros.sleep)
         self.ProgramAuto = 1
         self.Aperture = 2
         self.Shutter = 3

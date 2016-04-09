@@ -6,6 +6,7 @@ from pymavlink import mavutil, mavparm
 from MAVProxy.modules.lib import mp_util
 
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 
 class ParamState:
     '''this class is separated to make it possible to use the parameter
@@ -184,9 +185,9 @@ class ParamState:
 
             if (param.upper() == "WP_LOITER_RAD" or param.upper() == "LAND_BREAK_PATH"):
                 #need to redraw rally points
-                mpstate.module('rally').rallyloader.last_change = time.time()
+                mpstate.module('rally').rallyloader.last_change = sync_ros.time()
                 #need to redraw loiter points
-                mpstate.module('wp').wploader.last_change = time.time()
+                mpstate.module('wp').wploader.last_change = sync_ros.time()
 
         elif args[0] == "load":
             if len(args) < 2:

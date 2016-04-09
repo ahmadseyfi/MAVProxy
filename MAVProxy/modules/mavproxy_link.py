@@ -11,6 +11,7 @@ import time, struct, math, sys, fnmatch, traceback
 
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_util
+from MAVProxy.modules import sync_ros
 
 if mp_util.has_wxpython:
     from MAVProxy.modules.lib.mp_menu import *
@@ -180,7 +181,7 @@ class LinkModule(mp_module.MPModule):
 
     def get_usec(self):
         '''time since 1970 in microseconds'''
-        return int(time.time() * 1.0e6)
+        return int(sync_ros.time() * 1.0e6)
 
     def master_send_callback(self, m, master):
         '''called on sending a message'''
@@ -280,7 +281,7 @@ class LinkModule(mp_module.MPModule):
             if master.linkerror:
                 master.linkerror = False
                 self.say("link %u OK" % (master.linknum+1))
-            self.status.last_message = time.time()
+            self.status.last_message = sync_ros.time()
             master.last_message = self.status.last_message
 
         if master.link_delayed:
@@ -300,7 +301,7 @@ class LinkModule(mp_module.MPModule):
                 master.linkerror = False
                 self.say("link %u OK" % (master.linknum+1))
 
-            self.status.last_heartbeat = time.time()
+            self.status.last_heartbeat = sync_ros.time()
             master.last_heartbeat = self.status.last_heartbeat
 
             armed = self.master.motors_armed()
@@ -311,9 +312,9 @@ class LinkModule(mp_module.MPModule):
                 else:
                     self.say("DISARMED")
 
-            if master.flightmode != self.status.flightmode and time.time() > self.status.last_mode_announce + 2:
+            if master.flightmode != self.status.flightmode and sync_ros.time() > self.status.last_mode_announce + 2:
                 self.status.flightmode = master.flightmode
-                self.status.last_mode_announce = time.time()
+                self.status.last_mode_announce = sync_ros.time()
                 if self.mpstate.functions.input_handler is None:
                     self.mpstate.rl.set_prompt(self.status.flightmode + "> ")
                 self.say("Mode " + self.status.flightmode)
@@ -339,10 +340,10 @@ class LinkModule(mp_module.MPModule):
                 self.mpstate.vehicle_name = 'AntennaTracker'
         
         elif mtype == 'STATUSTEXT':
-            if m.text != self.status.last_apm_msg or time.time() > self.status.last_apm_msg_time+2:
+            if m.text != self.status.last_apm_msg or sync_ros.time() > self.status.last_apm_msg_time+2:
                 self.mpstate.console.writeln("APM: %s" % m.text, bg='red')
                 self.status.last_apm_msg = m.text
-                self.status.last_apm_msg_time = time.time()
+                self.status.last_apm_msg_time = sync_ros.time()
 
         elif mtype == "VFR_HUD":
             have_gps_lock = False
@@ -356,25 +357,25 @@ class LinkModule(mp_module.MPModule):
 
         elif mtype == "GPS_RAW":
             if self.status.have_gps_lock:
-                if m.fix_type != 2 and not self.status.lost_gps_lock and (time.time() - self.status.last_gps_lock) > 3:
+                if m.fix_type != 2 and not self.status.lost_gps_lock and (sync_ros.time() - self.status.last_gps_lock) > 3:
                     self.say("GPS fix lost")
                     self.status.lost_gps_lock = True
                 if m.fix_type == 2 and self.status.lost_gps_lock:
                     self.say("GPS OK")
                     self.status.lost_gps_lock = False
                 if m.fix_type == 2:
-                    self.status.last_gps_lock = time.time()
+                    self.status.last_gps_lock = sync_ros.time()
 
         elif mtype == "GPS_RAW_INT":
             if self.status.have_gps_lock:
-                if m.fix_type < 3 and not self.status.lost_gps_lock and (time.time() - self.status.last_gps_lock) > 3:
+                if m.fix_type < 3 and not self.status.lost_gps_lock and (sync_ros.time() - self.status.last_gps_lock) > 3:
                     self.say("GPS fix lost")
                     self.status.lost_gps_lock = True
                 if m.fix_type >= 3 and self.status.lost_gps_lock:
                     self.say("GPS OK")
                     self.status.lost_gps_lock = False
                 if m.fix_type >= 3:
-                    self.status.last_gps_lock = time.time()
+                    self.status.last_gps_lock = sync_ros.time()
 
         elif mtype == "NAV_CONTROLLER_OUTPUT" and self.status.flightmode == "AUTO" and self.mpstate.settings.distreadout:
             rounded_dist = int(m.wp_dist/self.mpstate.settings.distreadout)*self.mpstate.settings.distreadout

@@ -4,6 +4,7 @@ import mp_elevation
 import os
 import functools
 from mp_slipmap_util import *
+from MAVProxy.modules import sync_ros
 
 try:
     import cv2.cv as cv
@@ -203,7 +204,7 @@ class MPSlipMapFrame(wx.Frame):
                 state.need_redraw = True
         
         if obj is None:
-            time.sleep(0.05)
+            sync_ros.sleep(0.05)
 
 
 class MPSlipMapPanel(wx.Panel):

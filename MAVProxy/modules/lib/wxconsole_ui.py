@@ -3,6 +3,7 @@ import os
 import mp_menu
 from wxconsole_util import Value, Text
 from wx_loader import wx
+from MAVProxy.modules import sync_ros
 
 class ConsoleFrame(wx.Frame):
     """ The main frame of the console"""
@@ -50,7 +51,7 @@ class ConsoleFrame(wx.Frame):
         state.child_pipe_send.send(ret)
 
     def on_idle(self, event):
-        time.sleep(0.05)
+        sync_ros.sleep(0.05)
 
     def on_timer(self, event):
         state = self.state

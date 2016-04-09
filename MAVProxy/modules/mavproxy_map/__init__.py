@@ -14,6 +14,7 @@ from MAVProxy.modules.lib import mp_settings
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib.mp_menu import *
 from pymavlink import mavutil
+from MAVProxy.modules import sync_ros
 
 class MapModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -39,7 +40,7 @@ class MapModule(mp_module.MPModule):
         self.have_global_position = False
         self.vehicle_type_name = 'plane'
         self.ElevationMap = mp_elevation.ElevationModel()
-        self.last_unload_check_time = time.time()
+        self.last_unload_check_time = sync_ros.time()
         self.unload_check_interval = 0.1 # seconds
         self.map_settings = mp_settings.MPSettings(
             [ ('showgpspos', int, 0),
@@ -276,7 +277,7 @@ class MapModule(mp_module.MPModule):
             return
         if obj.event.m_leftDown and self.moving_rally is not None:
             self.click_position = obj.latlon
-            self.click_time = time.time()
+            self.click_time = sync_ros.time()
             self.mpstate.functions.process_stdin("rally move %u" % self.moving_rally)
             self.moving_rally = None
             return
@@ -286,13 +287,13 @@ class MapModule(mp_module.MPModule):
             return
         if obj.event.m_leftDown and self.moving_wp is not None:
             self.click_position = obj.latlon
-            self.click_time = time.time()
+            self.click_time = sync_ros.time()
             self.mpstate.functions.process_stdin("wp move %u" % self.moving_wp)
             self.moving_wp = None
             return
         if obj.event.m_leftDown and self.moving_fencepoint is not None:
             self.click_position = obj.latlon
-            self.click_time = time.time()
+            self.click_time = sync_ros.time()
             self.mpstate.functions.process_stdin("fence move %u" % (self.moving_fencepoint+1))
             self.moving_fencepoint = None
             return
@@ -305,9 +306,9 @@ class MapModule(mp_module.MPModule):
             self.moving_fencepoint = None
             return
         elif obj.event.m_leftDown:
-            if time.time() - self.click_time > 0.1:
+            if sync_ros.time() - self.click_time > 0.1:
                 self.click_position = obj.latlon
-                self.click_time = time.time()
+                self.click_time = sync_ros.time()
                 self.drawing_update()
 
             if self.module('misseditor') is not None:
@@ -317,9 +318,9 @@ class MapModule(mp_module.MPModule):
             if self.draw_callback is not None:
                 self.drawing_end()
                 return                
-            if time.time() - self.click_time > 0.1:
+            if sync_ros.time() - self.click_time > 0.1:
                 self.click_position = obj.latlon
-                self.click_time = time.time()
+                self.click_time = sync_ros.time()
             
     
     def unload(self):
@@ -329,7 +330,7 @@ class MapModule(mp_module.MPModule):
         self.mpstate.map_functions = {}
     
     def idle_task(self):
-        now = time.time()
+        now = sync_ros.time()
         if self.last_unload_check_time + self.unload_check_interval < now:
             self.last_unload_check_time = now
             if not self.mpstate.map.is_alive():
@@ -466,12 +467,12 @@ class MapModule(mp_module.MPModule):
             
         # if the waypoints have changed, redisplay
         last_wp_change = self.module('wp').wploader.last_change
-        if self.wp_change_time != last_wp_change and abs(time.time() - last_wp_change) > 1:
+        if self.wp_change_time != last_wp_change and abs(sync_ros.time() - last_wp_change) > 1:
             self.wp_change_time = last_wp_change
             self.display_waypoints()
 
             #this may have affected the landing lines from the rally points:
-            self.rally_change_time = time.time()
+            self.rally_change_time = sync_ros.time()
     
         # if the fence has changed, redisplay
         if self.fence_change_time != self.module('fence').fenceloader.last_change:

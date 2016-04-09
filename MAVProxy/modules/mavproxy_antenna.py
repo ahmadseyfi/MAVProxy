@@ -8,6 +8,7 @@ June 2012
 import sys, os, time
 from cuav.lib import cuav_util
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 
 class AntennaModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -46,9 +47,9 @@ class AntennaModule(mp_module.MPModule):
         else:
             return
         self.console.set_status('Antenna', 'Antenna %.0f' % bearing, row=0)
-        if abs(bearing - self.last_bearing) > 5 and (time.time() - self.last_announce) > 15:
+        if abs(bearing - self.last_bearing) > 5 and (sync_ros.time() - self.last_announce) > 15:
             self.last_bearing = bearing
-            self.last_announce = time.time()
+            self.last_announce = sync_ros.time()
             self.say("Antenna %u" % int(bearing + 0.5))
 
 def init(mpstate):

@@ -10,6 +10,7 @@ from pymavlink import mavutil, mavwp, mavextra
 from MAVProxy.modules.mavproxy_map import mp_slipmap, mp_tile
 from MAVProxy.modules.lib import mp_util
 import functools
+from MAVProxy.modules import sync_ros
 
 try:
     import cv2.cv as cv
@@ -32,7 +33,7 @@ def create_imagefile(options, filename, latlon, ground_width, path_objs, mission
                                width, height, ground_width)
     while mt.tiles_pending() > 0:
         print("Waiting on %u tiles" % mt.tiles_pending())
-        time.sleep(1)
+        sync_ros.sleep(1)
     map_img = mt.area_to_image(latlon[0], latlon[1],
                                width, height, ground_width)
     # a function to convert from (lat,lon) to (px,py) on the map

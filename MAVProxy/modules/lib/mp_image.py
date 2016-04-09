@@ -16,7 +16,7 @@ except ImportError:
 from MAVProxy.modules.lib import mp_util
 from MAVProxy.modules.lib import mp_widgets
 from MAVProxy.modules.lib.mp_menu import *
-
+from MAVProxy.modules import sync_ros
 
 class MPImageData:
     '''image data to display'''
@@ -195,7 +195,7 @@ class MPImageFrame(wx.Frame):
     def on_idle(self, event):
         '''prevent the main loop spinning too fast'''
         state = self.state
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)
 
 class MPImagePanel(wx.Panel):
     """ The image panel
@@ -536,4 +536,4 @@ if __name__ == "__main__":
                 print 'mouse', event.X, event.Y
             if event.ClassName == 'wxKeyEvent':
                 print 'key %u' % event.KeyCode
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)

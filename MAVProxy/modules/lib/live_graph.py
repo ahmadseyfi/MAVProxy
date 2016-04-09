@@ -9,6 +9,7 @@
 """
 
 from MAVProxy.modules.lib import mp_util
+from MAVProxy.modules import sync_ros
 
 class LiveGraph():
     '''
@@ -79,10 +80,10 @@ if __name__ == "__main__":
                           timespan=30,
                           title='Graph Test')
     while livegraph.is_alive():
-        t = time.time()
+        t = sync_ros.time()
         livegraph.add_values([math.sin(t), math.cos(t),
                               math.sin(t+1), math.cos(t+1),
                               math.sin(t+1), math.cos(t+1),
                               math.sin(t+1), math.cos(t+1),
                               math.sin(t+2), math.cos(t+2)])
-        time.sleep(0.05)
+        sync_ros.sleep(0.05)

@@ -10,6 +10,7 @@ import functools
 import math
 import os, sys
 import time
+from MAVProxy.modules import sync_ros
 
 try:
     import cv2.cv as cv
@@ -317,11 +318,11 @@ class SlipTrail:
         self.colour = colour
         self.count = count
         self.points = points
-        self.last_time = time.time()
+        self.last_time = sync_ros.time()
 
     def update_position(self, newpos):
         '''update trail'''
-        tnow = time.time()
+        tnow = sync_ros.time()
         if tnow >= self.last_time + self.timestep:
             self.points.append(newpos.latlon)
             self.last_time = tnow

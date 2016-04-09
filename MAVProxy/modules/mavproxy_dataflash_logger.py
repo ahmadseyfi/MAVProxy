@@ -23,7 +23,7 @@ from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_util
 import time
 from MAVProxy.modules.lib import mp_settings
-
+from MAVProxy.modules import sync_ros
 
 class dataflash_logger(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -106,8 +106,8 @@ class dataflash_logger(mp_module.MPModule):
         self.prev_cnt = 0
         self.download = 0
         self.prev_download = 0
-        self.last_idle_status_printed_time = time.time()
-        self.last_status_time = time.time()
+        self.last_idle_status_printed_time = sync_ros.time()
+        self.last_status_time = sync_ros.time()
         self.missing_blocks = {}
         self.acking_blocks = {}
         self.blocks_to_ack_and_nack = []
@@ -118,7 +118,7 @@ class dataflash_logger(mp_module.MPModule):
     def status(self):
         '''returns information about module'''
         transfered = self.download - self.prev_download
-        now = time.time()
+        now = sync_ros.time()
         interval = now - self.last_status_time
         self.last_status_time = now
         return("DFLogger: %(state)s Rate(%(interval)ds):%(rate).3fkB/s Block:%(block_cnt)d Missing:%(missing)d Fixed:%(fixed)d Abandoned:%(abandoned)d" %
@@ -133,7 +133,7 @@ class dataflash_logger(mp_module.MPModule):
 
     def idle_print_status(self):
         '''print out statistics every 10 seconds from idle loop'''
-        now = time.time()
+        now = sync_ros.time()
         if (now - self.last_idle_status_printed_time) >= 10:
             print self.status()
             self.last_idle_status_printed_time = now
@@ -144,7 +144,7 @@ class dataflash_logger(mp_module.MPModule):
         max_blocks_to_send = 10
         blocks_sent = 0
         i=0
-        now = time.time()
+        now = sync_ros.time()
         while i < len(self.blocks_to_ack_and_nack) and blocks_sent < max_blocks_to_send:
 #            print("ACKLIST: %s" % ([x[1] for x in self.blocks_to_ack_and_nack],))
             stuff = self.blocks_to_ack_and_nack[i]
@@ -215,7 +215,7 @@ class dataflash_logger(mp_module.MPModule):
 
     def tell_sender_to_stop(self, m):
         '''send a stop packet (if we haven't sent one in the last second)'''
-        now = time.time()
+        now = sync_ros.time()
         if now - self.time_last_stop_packet_sent < 1:
             return
         if self.log_settings.verbose:
@@ -227,7 +227,7 @@ class dataflash_logger(mp_module.MPModule):
                                                      1)
     def tell_sender_to_start(self):
         '''send a start packet (if we haven't sent one in the last second)'''
-        now = time.time()
+        now = sync_ros.time()
         if now - self.time_last_start_packet_sent < 1:
             return
         self.time_last_start_packet_sent = now
@@ -257,7 +257,7 @@ class dataflash_logger(mp_module.MPModule):
     def mavlink_packet(self, m):
         '''handle mavlink packets'''
         if m.get_type() == 'REMOTE_LOG_DATA_BLOCK':
-            now = time.time()
+            now = sync_ros.time()
             if not self.packet_is_for_me(m):
                 dropped += 1
                 return

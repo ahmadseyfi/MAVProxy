@@ -13,6 +13,7 @@ import time
 import math
 import cv2
 import sc_config
+from MAVProxy.modules import sync_ros
 
 class SmartCameraWebCam:
 
@@ -104,7 +105,7 @@ class SmartCameraWebCam:
                 break
     
             # take a rest for a bit
-            time.sleep(0.01)
+            sync_ros.sleep(0.01)
 
 # run test run from the command line
 if __name__ == "__main__":

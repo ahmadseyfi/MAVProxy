@@ -2,7 +2,7 @@
 '''settings object for MAVProxy modules'''
 
 import time
-
+from MAVProxy.modules import sync_ros
 class MPSetting:
     def __init__(self, name, type, default, label=None, tab=None,
                  range=None, increment=None, format=None,
@@ -65,7 +65,7 @@ class MPSettings(object):
         self._default_tab = 'Settings'
         self._keys = []
         self._callback = None
-        self._last_change = time.time()
+        self._last_change = sync_ros.time()
         for v in vars:
             self.append(v)
 
@@ -98,7 +98,7 @@ class MPSettings(object):
             self._default_tab = setting.tab
         self._vars[setting.name] = setting
         self._keys.append(setting.name)
-        self._last_change = time.time()
+        self._last_change = sync_ros.time()
 
 
     def __getattr__(self, name):
@@ -126,7 +126,7 @@ class MPSettings(object):
             print("Unable to convert %s to type %s" % (value, setting.type))
             return False
         if oldvalue != setting.value:
-            self._last_change = time.time()
+            self._last_change = sync_ros.time()
             if self._callback:
                 self._callback(setting)
         return True

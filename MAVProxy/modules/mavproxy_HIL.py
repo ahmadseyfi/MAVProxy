@@ -11,12 +11,13 @@ import sys, os, time, socket, errno, struct, math
 from math import degrees, radians
 from MAVProxy.modules.lib import mp_module
 from pymavlink import mavutil
+from MAVProxy.modules import sync_ros
 
 class HILModule(mp_module.MPModule):
     def __init__(self, mpstate):
         super(HILModule, self).__init__(mpstate, "HIL", "HIL simulation")
-        self.last_sim_send_time = time.time()
-        self.last_apm_send_time = time.time()
+        self.last_sim_send_time = sync_ros.time()
+        self.last_apm_send_time = sync_ros.time()
         self.rc_channels_scaled = mavutil.mavlink.MAVLink_rc_channels_scaled_message(0, 0, 0, 0, -10000, 0, 0, 0, 0, 0, 0)
         self.hil_state_msg = None
         sim_in_address  = ('127.0.0.1', 5501)
@@ -70,7 +71,7 @@ class HILModule(mp_module.MPModule):
         (p, q, r) = self.convert_body_frame(radians(roll), radians(pitch), radians(phidot), radians(thetadot), radians(psidot))
 
         try:
-            self.hil_state_msg = self.master.mav.hil_state_encode(int(time.time()*1e6),
+            self.hil_state_msg = self.master.mav.hil_state_encode(int(sync_ros.time()*1e6),
                                                                         radians(roll),
                                                                         radians(pitch),
                                                                         radians(yaw),
@@ -94,7 +95,7 @@ class HILModule(mp_module.MPModule):
 
     def check_sim_out(self):
         '''check if we should send new servos to flightgear'''
-        now = time.time()
+        now = sync_ros.time()
         if now - self.last_sim_send_time < 0.02 or self.rc_channels_scaled is None:
             return
         self.last_sim_send_time = now
@@ -114,7 +115,7 @@ class HILModule(mp_module.MPModule):
 
     def check_apm_out(self):
         '''check if we should send new data to the APM'''
-        now = time.time()
+        now = sync_ros.time()
         if now - self.last_apm_send_time < 0.02:
             return
         self.last_apm_send_time = now

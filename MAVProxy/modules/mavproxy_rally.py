@@ -7,6 +7,7 @@ from pymavlink import mavutil
 import time, os, platform
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_util
+from MAVProxy.modules import sync_ros
 
 if mp_util.has_wxpython:
     from MAVProxy.modules.lib.mp_menu import *
@@ -54,17 +55,17 @@ class RallyModule(mp_module.MPModule):
         '''handle abort command; it is critical that the AP to receive it'''
         if self.abort_ack_received is False:
             #only send abort every second (be insistent, but don't spam)
-            if (time.time() - self.abort_previous_send_time > 1):
+            if (sync_ros.time() - self.abort_previous_send_time > 1):
                 self.master.mav.command_long_send(self.settings.target_system,
                     self.settings.target_component,
                     mavutil.mavlink.MAV_CMD_DO_GO_AROUND,
                     0, int(self.abort_alt), 0, 0, 0, 0, 0, 0,)
-                self.abort_previous_send_time = time.time()
+                self.abort_previous_send_time = sync_ros.time()
 
             #try to get an ACK from the plane:
             if self.abort_first_send_time == 0:
-                self.abort_first_send_time = time.time()
-            elif time.time() - self.abort_first_send_time > 10: #give up after 10 seconds
+                self.abort_first_send_time = sync_ros.time()
+            elif sync_ros.time() - self.abort_first_send_time > 10: #give up after 10 seconds
                 print "Unable to send abort command!\n"
                 self.abort_ack_received = True
 
@@ -283,13 +284,13 @@ class RallyModule(mp_module.MPModule):
         '''fetch one rally point'''
         self.master.mav.rally_fetch_point_send(self.target_system,
                                                     self.target_component, i)
-        tstart = time.time()
+        tstart = sync_ros.time()
         p = None
-        while time.time() - tstart < 1:
+        while sync_ros.time() - tstart < 1:
             p = self.master.recv_match(type='RALLY_POINT', blocking=False)
             if p is not None:
                 break
-            time.sleep(0.1)
+            sync_ros.sleep(0.1)
             continue
         if p is None:
             self.console.error("Failed to fetch rally point %u" % i)

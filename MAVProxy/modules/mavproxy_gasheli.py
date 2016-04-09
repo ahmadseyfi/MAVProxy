@@ -8,6 +8,7 @@ from pymavlink import mavutil
 from MAVProxy.modules.lib import mp_util
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_settings
+from MAVProxy.modules import sync_ros
 
 class GasHeliModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -84,12 +85,12 @@ class GasHeliModule(mp_module.MPModule):
         '''run periodic tasks'''
         if self.starting_motor:
             if self.gasheli_settings.ignition_disable_time > 0:
-                elapsed = time.time() - self.motor_t1
+                elapsed = sync_ros.time() - self.motor_t1
                 if elapsed >= self.gasheli_settings.ignition_disable_time:
                     self.module('rc').set_override_chan(self.gasheli_settings.ignition_chan-1, self.old_override)
                     self.starting_motor = False
         if self.stopping_motor:
-            elapsed = time.time() - self.motor_t1
+            elapsed = sync_ros.time() - self.motor_t1
             if elapsed >= self.gasheli_settings.ignition_stop_time:
                 # hand back control to RC
                 self.module('rc').set_override_chan(self.gasheli_settings.ignition_chan-1, self.old_override)
@@ -99,7 +100,7 @@ class GasHeliModule(mp_module.MPModule):
         '''start motor'''
         if not self.valid_starter_settings():
             return
-        self.motor_t1 = time.time()
+        self.motor_t1 = sync_ros.time()
         self.stopping_motor = False
 
         if self.gasheli_settings.ignition_disable_time > 0:
@@ -125,7 +126,7 @@ class GasHeliModule(mp_module.MPModule):
         '''stop motor'''
         if not self.valid_starter_settings():
             return
-        self.motor_t1 = time.time()
+        self.motor_t1 = sync_ros.time()
         self.starting_motor = False
         self.stopping_motor = True
         self.old_override = self.module('rc').get_override_chan(self.gasheli_settings.ignition_chan-1)

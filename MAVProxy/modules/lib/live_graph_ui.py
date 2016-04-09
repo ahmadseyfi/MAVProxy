@@ -1,4 +1,5 @@
 from wx_loader import wx
+from MAVProxy.modules import sync_ros
 
 class GraphFrame(wx.Frame):
     """ The main frame of the application
@@ -136,7 +137,7 @@ class GraphFrame(wx.Frame):
 
     def on_idle(self, event):
         import time
-        time.sleep(self.state.tickresolution*0.5)
+        sync_ros.sleep(self.state.tickresolution*0.5)
 
     def on_redraw_timer(self, event):
         # if paused do not add data, but still redraw the plot

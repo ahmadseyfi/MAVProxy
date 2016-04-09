@@ -6,6 +6,7 @@
 import multiprocessing, threading
 import textconsole, sys, time
 from wxconsole_util import Value, Text
+from MAVProxy.modules import sync_ros
 
 class MessageConsole(textconsole.SimpleConsole):
     '''
@@ -49,7 +50,7 @@ class MessageConsole(textconsole.SimpleConsole):
                 msg = self.parent_pipe_recv.recv()
                 if self.menu_callback is not None:
                     self.menu_callback(msg)
-                time.sleep(0.1)
+                sync_ros.sleep(0.1)
         except EOFError:
             pass
 
@@ -91,4 +92,4 @@ if __name__ == "__main__":
         console.set_status('GPS', 'GPS: OK', fg='blue', bg='green')
         console.set_status('Link1', 'Link1: OK', fg='green', bg='white')
         console.set_status('Date', 'Date: %s' % time.asctime(), fg='red', bg='white', row=2)
-        time.sleep(0.5)
+        sync_ros.sleep(0.5)

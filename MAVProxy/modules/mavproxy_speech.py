@@ -3,6 +3,7 @@
 
 import time, os
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 
 class SpeechModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -37,7 +38,7 @@ class SpeechModule(mp_module.MPModule):
                 if pid > 1 and os.kill(pid, 0) is None:
                     print("Killing speech dispatcher pid %u" % pid)
                     os.kill(pid, signal.SIGINT)
-                    time.sleep(1)
+                    sync_ros.sleep(1)
             except Exception as e:
                 pass
 

@@ -23,6 +23,7 @@ from MAVProxy.modules.lib import wxsettings
 from MAVProxy.modules.lib.graphdefinition import GraphDefinition
 from lxml import objectify
 import pkg_resources
+from MAVProxy.modules import sync_ros
 
 #Global var to hold the GUI menu element
 TopMenu = None
@@ -394,12 +395,12 @@ def cmd_loadfile(args):
 def loadfile(args):    
     '''load a log file (path given by arg)'''
     mestate.console.write("Loading %s...\n" % args)
-    t0 = time.time()
+    t0 = sync_ros.time()
     mlog = mavutil.mavlink_connection(args, notimestamps=False,
                                       zero_time_base=False)
     mestate.mlog = mavmemlog.mavmemlog(mlog, progress_bar)
     mestate.status.msgs = mlog.messages
-    t1 = time.time()
+    t1 = sync_ros.time()
     mestate.console.write("\ndone (%u messages in %.1fs)\n" % (mestate.mlog._count, t1-t0))
 
     load_graphs()
@@ -457,7 +458,7 @@ def main_loop():
             cmds = line.split(';')
             for c in cmds:
                 process_stdin(c)
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)
 
 command_map = {
     'graph'      : (cmd_graph,     'display a graph'),

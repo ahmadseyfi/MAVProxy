@@ -19,6 +19,7 @@ import os
 import sys
 import string
 import time
+from MAVProxy.modules import sync_ros
 
 try:
 	import cv2.cv as cv
@@ -101,7 +102,7 @@ class TileInfo:
 
 	def refresh_time(self):
 		'''reset the request time'''
-		self.request_time = time.time()
+		self.request_time = sync_ros.time()
 
 	def coord(self, offset=(0,0)):
 		'''return lat,lon within a tile given (offsetx,offsety)'''
@@ -246,7 +247,7 @@ class MPTile:
 	def downloader(self):
 		'''the download thread'''
 		while self.tiles_pending() > 0:
-			time.sleep(self.tile_delay)
+			sync_ros.sleep(self.tile_delay)
 
 			keys = self._download_pending.keys()[:]
 
@@ -394,7 +395,7 @@ class MPTile:
 			ret = cv.LoadImage(path)
 
                         # if it is an old tile, then try to refresh
-                        if os.path.getmtime(path) + self.refresh_age < time.time():
+                        if os.path.getmtime(path) + self.refresh_age < sync_ros.time():
                                 try:
                                         self._download_pending[key].refresh_time()
                                 except Exception:
@@ -618,6 +619,6 @@ if __name__ == "__main__":
 		for tile in tlist:
 			mt.load_tile(tile)
 		while mt.tiles_pending() > 0:
-			time.sleep(2)
+			sync_ros.sleep(2)
 			print("Waiting on %u tiles" % mt.tiles_pending())
 	print('Done')

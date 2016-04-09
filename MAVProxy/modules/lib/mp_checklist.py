@@ -8,6 +8,7 @@
 import sys
 from MAVProxy.modules.lib import mp_util
 from wx_loader import wx
+from MAVProxy.modules import sync_ros
 
 class CheckItem():
     '''Checklist item used for information transfer
@@ -364,4 +365,4 @@ if __name__ == "__main__":
     #example auto-tick in second tab page
     while checklist.is_alive():
         checklist.set_check("Compass Calibrated", 1)
-        time.sleep(0.5)
+        sync_ros.sleep(0.5)

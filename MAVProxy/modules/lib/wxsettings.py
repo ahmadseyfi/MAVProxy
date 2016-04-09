@@ -3,6 +3,7 @@ Graphical editing of mp_settings object
 '''
 import os, sys
 import multiprocessing, threading
+from MAVProxy.modules import sync_ros
 
 class WXSettings(object):
     '''
@@ -70,4 +71,4 @@ if __name__ == "__main__":
     settings.set_callback(test_callback)
     dlg = WXSettings(settings)
     while dlg.is_alive():
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)

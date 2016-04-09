@@ -5,6 +5,7 @@ control MAVLink2 signing
 
 from pymavlink import mavutil
 import time, struct, math, sys
+from MAVProxy.modules import sync_ros
 
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_util
@@ -55,7 +56,7 @@ class SigningModule(mp_module.MPModule):
             secret_key.append(ord(b))
 
         epoch_offset = 1420070400
-        now = max(time.time(), epoch_offset)
+        now = max(sync_ros.time(), epoch_offset)
         initial_timestamp = int((now - epoch_offset)*1e5)
         self.master.mav.setup_signing_send(self.target_system, self.target_component,
                                            secret_key, initial_timestamp)

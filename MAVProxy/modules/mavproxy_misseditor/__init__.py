@@ -15,6 +15,7 @@ from pymavlink import mavutil
 
 import multiprocessing, time
 import threading
+from MAVProxy.modules import sync_ros
 
 class MissionEditorEventThread(threading.Thread):
     def __init__(self, mp_misseditor, q, l):
@@ -26,10 +27,10 @@ class MissionEditorEventThread(threading.Thread):
 
     def run(self):
         while not self.time_to_quit:
-            queue_access_start_time = time.time()
+            queue_access_start_time = sync_ros.time()
             self.event_queue_lock.acquire()
             request_read_after_processing_queue = False
-            while self.event_queue.qsize() > 0 and (time.time() - queue_access_start_time) < 0.6:
+            while self.event_queue.qsize() > 0 and (sync_ros.time() - queue_access_start_time) < 0.6:
                 event = self.event_queue.get()
 
                 if event.get_type() == me_event.MEE_READ_WPS:
@@ -78,7 +79,7 @@ class MissionEditorEventThread(threading.Thread):
                     # likely same reason why "timeout setting WP_LOITER_RAD"
                     #comes back:
                     #TODO: fix timeout issue
-                    self.mp_misseditor.mpstate.module('rally').rallyloader.last_change = time.time()
+                    self.mp_misseditor.mpstate.module('rally').rallyloader.last_change = sync_ros.time()
 
                 elif event.get_type() == me_event.MEE_GET_WP_DEFAULT_ALT:
                     self.mp_misseditor.gui_event_queue_lock.acquire()
@@ -121,7 +122,7 @@ class MissionEditorEventThread(threading.Thread):
                     i = 0
                     while (i < 10 and 
                             self.mp_misseditor.module('wp').loading_waypoints):
-                        time.sleep(1)
+                        sync_ros.sleep(1)
                         i = i + 1
 
                     #don't modify queue while in the middile of processing it:
@@ -142,7 +143,7 @@ class MissionEditorEventThread(threading.Thread):
             #periodically re-request WPs that were never received:
             #DON'T NEED TO! -- wp module already doing this
 
-            time.sleep(0.2)
+            sync_ros.sleep(0.2)
 
 class MissionEditorModule(mp_module.MPModule):
     '''

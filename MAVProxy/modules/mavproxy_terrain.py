@@ -8,6 +8,7 @@ from MAVProxy.modules.mavproxy_map import mp_elevation
 from MAVProxy.modules.lib import mp_util
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_settings
+from MAVProxy.modules import sync_ros
 
 class TerrainModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -16,7 +17,7 @@ class TerrainModule(mp_module.MPModule):
         self.ElevationModel = mp_elevation.ElevationModel()
         self.current_request = None
         self.sent_mask = 0
-        self.last_send_time = time.time()
+        self.last_send_time = sync_ros.time()
         self.requests_received = 0
         self.blocks_sent = 0
         self.check_lat = 0
@@ -107,7 +108,7 @@ class TerrainModule(mp_module.MPModule):
                                           bit,
                                           data)
         self.blocks_sent += 1
-        self.last_send_time = time.time()
+        self.last_send_time = sync_ros.time()
         self.sent_mask |= 1<<bit
         if self.terrain_settings.debug and bit == 55:
             lat = self.current_request.lat * 1.0e-7
@@ -135,7 +136,7 @@ class TerrainModule(mp_module.MPModule):
         '''called when idle'''
         if self.current_request is None:
             return
-        if time.time() - self.last_send_time < 0.2:
+        if sync_ros.time() - self.last_send_time < 0.2:
             # limit to 5 per second
             return
         self.send_terrain_data()

@@ -15,10 +15,12 @@ import select
 import shlex
 import rospy
 
+
 from MAVProxy.modules.lib import textconsole
 from MAVProxy.modules.lib import rline
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import dumpstacks
+from MAVProxy.modules import sync_ros
 
 # adding all this allows pyinstaller to build a working windows executable
 # note that using --hidden-import does not work for these modules
@@ -438,7 +440,7 @@ def process_stdin(line):
         if line != '+++':
             line += '\r'
         for c in line:
-            time.sleep(0.01)
+            sync_ros.sleep(0.01)
             mpstate.master().write(c)
         return
 
@@ -487,12 +489,12 @@ def process_master(m):
     try:
         s = m.recv(16*1024)
     except Exception:
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)
         return
     # prevent a dead serial port from causing the CPU to spin. The user hitting enter will
     # cause it to try and reconnect
     if len(s) == 0:
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)
         return
 
     if (mpstate.settings.compdebug & 1) != 0:
@@ -653,7 +655,7 @@ def set_stream_rates():
 
 def check_link_status():
     '''check status of master links'''
-    tnow = time.time()
+    tnow = sync_ros.time()
     if mpstate.status.last_message != 0 and tnow > mpstate.status.last_message + 5:
         say("no link")
         mpstate.status.heartbeat_error = True
@@ -748,7 +750,7 @@ def main_loop():
             m = mpstate.sysid_outputs[sysid]
             rin.append(m.fd)
         if rin == []:
-            time.sleep(0.0001)
+            sync_ros.sleep(0.0001)
             continue
 
         for fd in mpstate.select_extra:
@@ -911,6 +913,13 @@ if __name__ == '__main__':
         print "MAVProxy is a modular ground station using the mavlink protocol"
         print "MAVProxy Version: " + version
         sys.exit(1)
+    #Waiting for ROS Master to run
+    print "[Watchdog] Trying to register to ROS"
+    rospy.init_node('my_node_name', anonymous=True)
+    #print "time 1",sync_ros.time()
+    #sync_ros.sleep(30)
+    #print "time 2",sync_ros.time()
+    print "[Watchdog] ROS master is ready. Continuing...."
     
     # global mavproxy state
     mpstate = MPState()
@@ -980,10 +989,12 @@ if __name__ == '__main__':
           mpstate.module('link').link_add(wifi_device)
 
     #Waiting for ROS Master to run
-    print "[Watchdog] Trying to register to ROS"
-    rospy.init_node('my_node_name', anonymous=True)
-    rospy.sleep(5)
-    print "[Watchdog] ROS master is ready. Continuing...."
+    #print "[Watchdog] Trying to register to ROS"
+    #rospy.init_node('my_node_name', anonymous=True)
+    #print "time 1",sync_ros.time()
+    #sync_ros.sleep(5)
+    #print "time 2",sync_ros.time()
+    #print "[Watchdog] ROS master is ready. Continuing...."
     # open any mavlink output ports
     for port in opts.output:
         mpstate.mav_outputs.append(mavutil.mavlink_connection(port, baud=int(opts.baudrate), input=False))
@@ -1066,7 +1077,7 @@ if __name__ == '__main__':
     while (mpstate.status.exit != True):
         try:
             if opts.daemon:
-                time.sleep(0.1)
+                sync_ros.sleep(0.1)
             else:
                 input_loop()
         except KeyboardInterrupt:

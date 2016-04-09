@@ -12,7 +12,7 @@ from MAVProxy.modules.mavproxy_map import mp_slipmap
 from MAVProxy.modules.lib import mp_settings
 from MAVProxy.modules.lib.mp_menu import *  # popup menus
 from pymavlink import mavutil
-
+from MAVProxy.modules import sync_ros
 
 class ADSBVehicle(object):
     '''a generic ADS-B threat'''
@@ -23,7 +23,7 @@ class ADSBVehicle(object):
         self.vehicle_colour = 'green'  # use plane icon for now
         self.vehicle_type = 'plane'
         self.icon = self.vehicle_colour + self.vehicle_type + '.png'
-        self.update_time = time.time()
+        self.update_time = sync_ros.time()
         self.is_evading_threat = False
         self.v_distance = None
         self.h_distance = None
@@ -32,7 +32,7 @@ class ADSBVehicle(object):
     def update(self, state):
         '''update the threat state'''
         self.state = state
-        self.update_time = time.time()
+        self.update_time = sync_ros.time()
 
 
 class ADSBModule(mp_module.MPModule):
@@ -138,7 +138,7 @@ class ADSBModule(mp_module.MPModule):
 
     def check_threat_timeout(self):
         '''check and handle threat time out'''
-        current_time = time.time()
+        current_time = sync_ros.time()
         for id in self.threat_vehicles.keys():
             if current_time - self.threat_vehicles[id].update_time > self.ADSB_settings.timeout:
                 # if the threat has timed out...

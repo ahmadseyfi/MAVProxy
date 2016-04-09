@@ -12,6 +12,7 @@ import time
 import numpy
 
 from MAVProxy.modules.mavproxy_map import srtm
+from MAVProxy.modules import sync_ros
 
 class ElevationModel():
     '''Elevation Model. Only SRTM for now'''
@@ -41,11 +42,11 @@ class ElevationModel():
                 tile = self.downloader.getTile(numpy.floor(latitude), numpy.floor(longitude))
                 if tile == 0:
                     if timeout > 0:
-                        t0 = time.time()
-                        while time.time() < t0+timeout and tile == 0:
+                        t0 = sync_ros.time()
+                        while sync_ros.time() < t0+timeout and tile == 0:
                             tile = self.downloader.getTile(numpy.floor(latitude), numpy.floor(longitude))
                             if tile == 0:
-                                time.sleep(0.1)
+                                sync_ros.sleep(0.1)
                 if tile == 0:
                     return None
                 self.tileDict[TileID] = tile
@@ -74,26 +75,26 @@ if __name__ == "__main__":
     '''Do a few lat/long pairs to demonstrate the caching
     Note the +0.000001 to the time. On faster PCs, the two time periods
     may in fact be equal, so we add a little extra time on the end to account for this'''
-    t0 = time.time()
+    t0 = sync_ros.time()
     alt = EleModel.GetElevation(lat, lon, timeout=10)
     if alt is None:
         print("Tile not available")
         sys.exit(1)
-    t1 = time.time()+.000001
+    t1 = sync_ros.time()+.000001
     print("Altitude at (%.6f, %.6f) is %u m. Pulled at %.1f FPS" % (lat, lon, alt, 1/(t1-t0)))
 
     lat = opts.lat+0.001
     lon = opts.lon+0.001
-    t0 = time.time()
+    t0 = sync_ros.time()
     alt = EleModel.GetElevation(lat, lon, timeout=10)
-    t1 = time.time()+.000001
+    t1 = sync_ros.time()+.000001
     print("Altitude at (%.6f, %.6f) is %u m. Pulled at %.1f FPS" % (lat, lon, alt, 1/(t1-t0)))
 
     lat = opts.lat-0.001
     lon = opts.lon-0.001
-    t0 = time.time()
+    t0 = sync_ros.time()
     alt = EleModel.GetElevation(lat, lon, timeout=10)
-    t1 = time.time()+.000001
+    t1 = sync_ros.time()+.000001
     print("Altitude at (%.6f, %.6f) is %u m. Pulled at %.1f FPS" % (lat, lon, alt, 1/(t1-t0)))
 
 

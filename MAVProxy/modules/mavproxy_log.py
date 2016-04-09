@@ -4,6 +4,7 @@
 import time, os
 
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 
 class LogModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -58,9 +59,9 @@ class LogModule(mp_module.MPModule):
             self.download_file.write(s)
             self.download_set.add(m.ofs // 90)
             self.download_ofs += m.count
-        self.download_last_timestamp = time.time()
+        self.download_last_timestamp = sync_ros.time()
         if m.count == 0 or (m.count < 90 and len(self.download_set) == 1 + (m.ofs // 90)):
-            dt = time.time() - self.download_start
+            dt = sync_ros.time() - self.download_start
             self.download_file.close()
             size = os.path.getsize(self.download_filename)
             speed = size / (1000.0 * dt)
@@ -109,7 +110,7 @@ class LogModule(mp_module.MPModule):
         if self.download_filename is None:
             print("No download")
             return
-        dt = time.time() - self.download_start
+        dt = sync_ros.time() - self.download_start
         speed = os.path.getsize(self.download_filename) / (1000.0 * dt)
         m = self.entries.get(self.download_lognum, None)
         if m is None:
@@ -147,8 +148,8 @@ class LogModule(mp_module.MPModule):
                                                    log_num, 0, 0xFFFFFFFF)
         self.download_filename = filename
         self.download_set = set()
-        self.download_start = time.time()
-        self.download_last_timestamp = time.time()
+        self.download_start = sync_ros.time()
+        self.download_last_timestamp = sync_ros.time()
         self.download_ofs = 0
         self.retries = 0
 
@@ -206,8 +207,8 @@ class LogModule(mp_module.MPModule):
 
     def idle_task(self):
         '''handle missing log data'''
-        if self.download_last_timestamp is not None and time.time() - self.download_last_timestamp > 0.7:
-            self.download_last_timestamp = time.time()
+        if self.download_last_timestamp is not None and sync_ros.time() - self.download_last_timestamp > 0.7:
+            self.download_last_timestamp = sync_ros.time()
             self.handle_log_data_missing()
 
 def init(mpstate):

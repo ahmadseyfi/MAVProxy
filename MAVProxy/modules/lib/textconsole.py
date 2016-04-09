@@ -4,6 +4,7 @@
   MAVProxy default console
 """
 import sys
+from MAVProxy.modules import sync_ros
 
 class SimpleConsole():
     '''
@@ -48,4 +49,4 @@ if __name__ == "__main__":
         console.write('Tick', fg='red')
         console.write(" %s " % time.asctime())
         console.writeln('tock', bg='yellow')
-        time.sleep(0.5)
+        sync_ros.sleep(0.5)

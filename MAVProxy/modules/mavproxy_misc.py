@@ -10,6 +10,7 @@ from MAVProxy.modules.lib import mp_module
 from os import kill
 from signal import signal
 from subprocess import PIPE, Popen
+from MAVProxy.modules import sync_ros
 
 class RepeatCommand(object):
     '''repeated command object'''
@@ -31,7 +32,7 @@ def run_command(args, cwd = None, shell = False, timeout = None, env = None):
     from StringIO import StringIO
     import fcntl, os, signal
     p = Popen(args, shell = shell, cwd = cwd, stdout = PIPE, stderr = PIPE, env = env)
-    tstart = time.time()
+    tstart = sync_ros.time()
     buf = StringIO()
 
     # try to make it non-blocking
@@ -41,7 +42,7 @@ def run_command(args, cwd = None, shell = False, timeout = None, env = None):
         pass
 
     while True:
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)
         retcode = p.poll()
         try:
             buf.write(p.stdout.read())
@@ -49,7 +50,7 @@ def run_command(args, cwd = None, shell = False, timeout = None, env = None):
             pass
         if retcode is not None:
             break
-        if timeout is not None and time.time() > tstart + timeout:
+        if timeout is not None and sync_ros.time() > tstart + timeout:
             print("timeout in process %u" % p.pid)
             try: 
                 os.kill(p.pid, signal.SIGKILL)

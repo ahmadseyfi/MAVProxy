@@ -5,7 +5,7 @@ import time, math
 from pymavlink import mavutil
 
 from MAVProxy.modules.lib import mp_module
-
+from MAVProxy.modules import sync_ros
 
 def angle_diff(angle1, angle2):
     ret = angle1 - angle2
@@ -82,10 +82,10 @@ class SensorsModule(mp_module.MPModule):
     def report(self, name, ok, msg=None, deltat=20):
         '''report a sensor error'''
         r = self.reports[name]
-        if time.time() < r.last_report + deltat:
+        if sync_ros.time() < r.last_report + deltat:
             r.ok = ok
             return
-        r.last_report = time.time()
+        r.last_report = sync_ros.time()
         if ok and not r.ok:
             self.say("%s OK" % name)
         r.ok = ok
@@ -95,9 +95,9 @@ class SensorsModule(mp_module.MPModule):
     def report_change(self, name, value, maxdiff=1, deltat=10):
         '''report a sensor change'''
         r = self.reports[name]
-        if time.time() < r.last_report + deltat:
+        if sync_ros.time() < r.last_report + deltat:
             return
-        r.last_report = time.time()
+        r.last_report = sync_ros.time()
         if math.fabs(r.value - value) < maxdiff:
             return
         r.value = value
@@ -129,8 +129,8 @@ class SensorsModule(mp_module.MPModule):
                 else:
                     speed = m.groundspeed
                 self.report_change('speed', speed, maxdiff=2, deltat=2)
-        if self.status.watch == "sensors" and time.time() > self.sensors_state.last_watch + 1:
-            self.sensors_state.last_watch = time.time()
+        if self.status.watch == "sensors" and sync_ros.time() > self.sensors_state.last_watch + 1:
+            self.sensors_state.last_watch = sync_ros.time()
             self.cmd_sensors([])
 
 def init(mpstate):

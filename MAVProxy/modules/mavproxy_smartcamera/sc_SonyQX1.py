@@ -35,6 +35,7 @@ import xml.etree.ElementTree as ET
 # Own Headers
 import ssdp
 
+from MAVProxy.modules import sync_ros
 #****************************************************************************
 # Constants
 #****************************************************************************
@@ -151,15 +152,15 @@ class SmartCamera_SonyQX():
         if 'startRecMode' in (APIList['result'])[0]:
             print("Need to send startRecMode, sending and waiting 5 sec...")
             self.__sSimpleCall("startRecMode")
-            time.sleep(1)
+            sync_ros.sleep(1)
             print("4 sec")
-            time.sleep(1)
+            sync_ros.sleep(1)
             print("3 sec")
-            time.sleep(1)
+            sync_ros.sleep(1)
             print("2 sec")
-            time.sleep(1)
+            sync_ros.sleep(1)
             print("1 sec")
-            time.sleep(1)
+            sync_ros.sleep(1)
 
         # Set Postview Size to Orignial size to get real image filename
         sResponse = self.__sSimpleCall("setPostviewImageSize", adictParams=["Original"])
@@ -560,7 +561,7 @@ class SmartCamera_SonyQX():
         
         # Check response for a succesful result
         if 'result' in sResponse:
-            time.sleep(0.25)
+            sync_ros.sleep(0.25)
             sResponse = self.__sSimpleCall("getExposureMode")
             
             if sExposureMode not in sResponse["result"]:
@@ -599,7 +600,7 @@ class SmartCamera_SonyQX():
             
         # Check response for a succesful result
         if 'result' in sResponse:
-            time.sleep(0.25)
+            sync_ros.sleep(0.25)
             sResponse = self.__sSimpleCall("getShutterSpeed")
             
             if sShutterSpeed not in sResponse["result"]:
@@ -638,7 +639,7 @@ class SmartCamera_SonyQX():
         
         # Check response for a succesful result
         if 'result' in sResponse:
-            time.sleep(0.25)
+            sync_ros.sleep(0.25)
             sResponse = self.__sSimpleCall("getFNumber")
             
             if sFValue not in sResponse["result"]:
@@ -775,7 +776,7 @@ class SmartCamera_SonyQX():
                 break
     
             # take a rest for a bit
-            time.sleep(0.01)
+            sync_ros.sleep(0.01)
 
 # run test run from the command line
 if __name__ == "__main__":

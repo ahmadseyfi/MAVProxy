@@ -7,6 +7,7 @@ November 2013
 '''
 
 from MAVProxy.modules.lib import mp_util
+from MAVProxy.modules import sync_ros
 
 class MPMenuGeneric(object):
     '''a MP menu separator'''
@@ -366,4 +367,4 @@ if __name__ == '__main__':
                 continue
             else:
                 print(event)
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)

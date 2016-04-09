@@ -6,6 +6,7 @@ from pymavlink import mavutil
 
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib.mp_settings import MPSetting
+from MAVProxy.modules import sync_ros
 
 class BatteryModule(mp_module.MPModule):
     def __init__(self, mpstate):
@@ -58,8 +59,8 @@ class BatteryModule(mp_module.MPModule):
         self.console.set_status('Battery', battery_string, row=1)
 
         rbattery_level = int((self.battery_level+5)/10)*10
-        if batt_mon >= 4 and self.settings.battwarn > 0 and time.time() > self.last_battery_announce_time + 60*self.settings.battwarn:
-            self.last_battery_announce_time = time.time()
+        if batt_mon >= 4 and self.settings.battwarn > 0 and sync_ros.time() > self.last_battery_announce_time + 60*self.settings.battwarn:
+            self.last_battery_announce_time = sync_ros.time()
             if rbattery_level != self.last_battery_announce:
                 self.say("Flight battery %u percent" % rbattery_level, priority='notification')
                 self.last_battery_announce = rbattery_level
@@ -68,9 +69,9 @@ class BatteryModule(mp_module.MPModule):
             if self.voltage_level != -1 and rbattery_level <= 20:
                 self.say("Flight battery warning")
 
-        if self.settings.numcells != 0 and self.per_cell < self.settings.batwarncell and time.time() > self.last_battery_cell_announce_time + 60*self.settings.battwarn:
+        if self.settings.numcells != 0 and self.per_cell < self.settings.batwarncell and sync_ros.time() > self.last_battery_cell_announce_time + 60*self.settings.battwarn:
             self.say("Cell warning")
-            self.last_battery_cell_announce_time = time.time()
+            self.last_battery_cell_announce_time = sync_ros.time()
             
 
     def vcell_to_battery_percent(self, vcell):
@@ -100,7 +101,7 @@ class BatteryModule(mp_module.MPModule):
 
     def power_status_update(self, POWER_STATUS):
         '''update POWER_STATUS warnings level'''
-        now = time.time()
+        now = sync_ros.time()
         Vservo = POWER_STATUS.Vservo * 0.001
         Vcc = POWER_STATUS.Vcc * 0.001
         self.high_servo_voltage = max(self.high_servo_voltage, Vservo)

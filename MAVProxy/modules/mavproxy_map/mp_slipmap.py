@@ -20,6 +20,7 @@ from MAVProxy.modules.mavproxy_map import mp_elevation
 from MAVProxy.modules.mavproxy_map import mp_tile
 from MAVProxy.modules.lib import mp_util
 from mp_slipmap_util import *
+from MAVProxy.modules import sync_ros
 
 
 class MPSlipMap():
@@ -99,7 +100,7 @@ class MPSlipMap():
         self.close_window.release()
         count=0
         while self.child.is_alive() and count < 30: # 3 seconds to die...
-            time.sleep(0.1) #?
+            sync_ros.sleep(0.1) #?
             count+=1
 
         if self.child.is_alive():
@@ -227,4 +228,4 @@ if __name__ == "__main__":
                                                                         len(obj.selected)))
             if isinstance(obj, SlipKeyEvent):
                 print("Key event at %s for %u objects" % (obj.latlon, len(obj.selected)))
-        time.sleep(0.1)
+        sync_ros.sleep(0.1)

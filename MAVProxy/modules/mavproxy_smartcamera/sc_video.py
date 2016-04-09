@@ -15,6 +15,7 @@ import math
 from multiprocessing import Process, Pipe
 import cv2
 import sc_config
+from MAVProxy.modules import sync_ros
 
 class SmartCameraVideo:
 
@@ -181,7 +182,7 @@ class SmartCameraVideo:
                 break
     
             # take a rest for a bit
-            time.sleep(0.1)
+            sync_ros.sleep(0.1)
 
         # send exit command to image capture process
         self.stop_background_capture()

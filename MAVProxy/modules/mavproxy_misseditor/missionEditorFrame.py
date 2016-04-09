@@ -18,6 +18,7 @@ MissionEditorEvent = me_event.MissionEditorEvent
 from MAVProxy.modules.mavproxy_misseditor import me_defines
 
 from MAVProxy.modules.mavproxy_misseditor import button_renderer
+from MAVProxy.modules import sync_ros
 
 #define column names via "enums":
 ME_COMMAND_COL = 0
@@ -220,9 +221,9 @@ class MissionEditorFrame(wx.Frame):
 
     def time_to_process_gui_events(self, evt):
         event_processed = False
-        queue_access_start_time = time.time()
+        queue_access_start_time = sync_ros.time()
         self.gui_event_queue_lock.acquire()
-        while self.gui_event_queue.qsize() > 0 and (time.time() < queue_access_start_time) < 0.6:
+        while self.gui_event_queue.qsize() > 0 and (sync_ros.time() < queue_access_start_time) < 0.6:
             event_processed = True
             event = self.gui_event_queue.get()
             if event.get_type() == me_event.MEGE_CLEAR_MISS_TABLE:

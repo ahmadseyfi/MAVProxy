@@ -5,6 +5,7 @@ import os, time, platform
 from pymavlink import mavwp, mavutil
 from MAVProxy.modules.lib import mp_util
 from MAVProxy.modules.lib import mp_module
+from MAVProxy.modules import sync_ros
 if mp_util.has_wxpython:
     from MAVProxy.modules.lib.mp_menu import *
 
@@ -234,13 +235,13 @@ class FenceModule(mp_module.MPModule):
         '''fetch one fence point'''
         self.master.mav.fence_fetch_point_send(self.target_system,
                                                     self.target_component, i)
-        tstart = time.time()
+        tstart = sync_ros.time()
         p = None
-        while time.time() - tstart < 3:
+        while sync_ros.time() - tstart < 3:
             p = self.master.recv_match(type='FENCE_POINT', blocking=False)
             if p is not None:
                 break
-            time.sleep(0.1)
+            sync_ros.sleep(0.1)
             continue
         if p is None:
             self.console.error("Failed to fetch point %u" % i)

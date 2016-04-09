@@ -5,6 +5,7 @@ import time, os, fnmatch, copy, platform
 from pymavlink import mavutil, mavwp
 from MAVProxy.modules.lib import mp_module
 from MAVProxy.modules.lib import mp_util
+from MAVProxy.modules import sync_ros
 if mp_util.has_wxpython:
     from MAVProxy.modules.lib.mp_menu import *
 
@@ -15,7 +16,7 @@ class WPModule(mp_module.MPModule):
         self.wp_save_filename = None
         self.wploader = mavwp.MAVWPLoader()
         self.loading_waypoints = False
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.last_waypoint = 0
         self.wp_period = mavutil.periodic_event(0.5)
         self.undo_wp = None
@@ -120,7 +121,7 @@ class WPModule(mp_module.MPModule):
     def process_waypoint_request(self, m, master):
         '''process a waypoint request from the master'''
         if (not self.loading_waypoints or
-            time.time() > self.loading_waypoint_lasttime + 10.0):
+            sync_ros.time() > self.loading_waypoint_lasttime + 10.0):
             self.loading_waypoints = False
             self.console.error("not loading waypoints")
             return
@@ -131,7 +132,7 @@ class WPModule(mp_module.MPModule):
         wp.target_system = self.target_system
         wp.target_component = self.target_component
         self.master.mav.send(self.wploader.wp(m.seq))
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.console.writeln("Sent waypoint %u : %s" % (m.seq, self.wploader.wp(m.seq)))
         if m.seq == self.wploader.count() - 1:
             self.loading_waypoints = False
@@ -143,7 +144,7 @@ class WPModule(mp_module.MPModule):
         if self.wploader.count() == 0:
             return
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.waypoint_count_send(self.wploader.count())
 
     def load_waypoints(self, filename):
@@ -179,7 +180,7 @@ class WPModule(mp_module.MPModule):
             print("Loaded updated waypoint %u from %s" % (wpnum, filename))
 
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         if wpnum == -1:
             start = 0
             end = self.wploader.count()-1
@@ -241,7 +242,7 @@ class WPModule(mp_module.MPModule):
                                                           0, 1, 1, -1, 0, 0, 0, 0, 0)
         loader.add(wp)
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.waypoint_count_send(self.wploader.count())
         print("Closed loop on mission")
 
@@ -261,7 +262,7 @@ class WPModule(mp_module.MPModule):
         w.y = lon
         self.wploader.set(w, 0)
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.mav.mission_write_partial_list_send(self.target_system,
                                                              self.target_component,
                                                              0, 0)
@@ -303,7 +304,7 @@ class WPModule(mp_module.MPModule):
         wp.target_system    = self.target_system
         wp.target_component = self.target_component
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.mav.mission_write_partial_list_send(self.target_system,
                                                         self.target_component,
                                                         idx, idx)
@@ -378,7 +379,7 @@ class WPModule(mp_module.MPModule):
             self.wploader.set(wp, wpnum)
             
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.mav.mission_write_partial_list_send(self.target_system,
                                                         self.target_component,
                                                         wpstart, wpend+1)
@@ -414,7 +415,7 @@ class WPModule(mp_module.MPModule):
             wp.target_system    = self.target_system
             wp.target_component = self.target_component
             self.loading_waypoints = True
-            self.loading_waypoint_lasttime = time.time()
+            self.loading_waypoint_lasttime = sync_ros.time()
             self.master.mav.mission_write_partial_list_send(self.target_system,
                                                             self.target_component,
                                                             self.undo_wp_idx, self.undo_wp_idx)
@@ -458,7 +459,7 @@ class WPModule(mp_module.MPModule):
         wp.target_system    = self.target_system
         wp.target_component = self.target_component
         self.loading_waypoints = True
-        self.loading_waypoint_lasttime = time.time()
+        self.loading_waypoint_lasttime = sync_ros.time()
         self.master.mav.mission_write_partial_list_send(self.target_system,
                                                         self.target_component,
                                                         idx, idx)

@@ -7,6 +7,7 @@ import sc_config
 from sc_video import sc_video
 from sc_webcam import SmartCameraWebCam
 from sc_SonyQX1 import SmartCamera_SonyQX
+from MAVProxy.modules import sync_ros
 
 """
 sc_main.py - runs top level smart camera function
@@ -38,7 +39,7 @@ class SmartCamera(object):
         # initialised flag
         self.home_initialised = False
         # timer to intermittently check for home position
-        self.last_home_check = time.time()
+        self.last_home_check = sync_ros.time()
         self.home_location = None
 
         # vehicle mission
@@ -93,10 +94,10 @@ class SmartCamera(object):
             return True
 
         # check for home no more than once every two seconds
-        if (time.time() - self.last_home_check > 2):
+        if (sync_ros.time() - self.last_home_check > 2):
 
             # update that we have performed a status check
-            self.last_home_check = time.time()
+            self.last_home_check = sync_ros.time()
 
             # check if we have a vehicle
             if self.vehicle is None:
@@ -187,7 +188,7 @@ class SmartCamera(object):
     def analyze_image(self):
 
         # record time
-        now = time.time()
+        now = sync_ros.time()
 
         # get new image from camera
         f = self.get_frame()
@@ -205,7 +206,7 @@ class SmartCamera(object):
             self.save_picture_all()
 
             # Don't suck up too much CPU, only process a new image occasionally
-            time.sleep(1)
+            sync_ros.sleep(1)
 
         '''
         while not self.api.exit:
@@ -223,7 +224,7 @@ class SmartCamera(object):
                 self.take_picture_all()
 
             # Don't suck up too much CPU, only process a new image occasionally
-            time.sleep(2.0)
+            sync_ros.sleep(2.0)
 
         if not self.use_simulator:
             sc_video.stop_background_capture()
