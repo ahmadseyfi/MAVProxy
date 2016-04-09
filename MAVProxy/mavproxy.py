@@ -983,7 +983,7 @@ if __name__ == '__main__':
     print "[Watchdog] Trying to register to ROS"
     rospy.init_node('my_node_name', anonymous=True)
     rospy.sleep(5)
-    print "[Watchdog] ROS master is ready. Continuing..."
+    print "[Watchdog] ROS master is ready. Continuing...."
     # open any mavlink output ports
     for port in opts.output:
         mpstate.mav_outputs.append(mavutil.mavlink_connection(port, baud=int(opts.baudrate), input=False))
