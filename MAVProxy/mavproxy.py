@@ -916,7 +916,7 @@ if __name__ == '__main__':
     #Waiting for ROS Master to run
     print "[Watchdog] Trying to register to ROS"
     rospy.init_node('my_node_name', anonymous=True)
-    #print "time 1",sync_ros.time()
+    print "time 1",sync_ros.time()
     #sync_ros.sleep(30)
     #print "time 2",sync_ros.time()
     print "[Watchdog] ROS master is ready. Continuing...."
